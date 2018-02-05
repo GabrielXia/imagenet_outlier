@@ -1,0 +1,12 @@
+*.pyc
+/MNIST_data
+/.ipynb_checkpoints
+
+/n01440764
+/n01443537
+
+/imagenet_outlier*
+ResNet-L152.ckpt
+ResNet-L152.meta
+*.ipynb
+
