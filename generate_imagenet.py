@@ -37,8 +37,10 @@ def generate_outlier(train_features, train_labels, features, ratio):
     return images_outlier.astype(np.uint8), labels_outlier.astype(np.uint8), labels_true.astype(np.uint8), if_outlier.astype(np.uint8), features_resnet.astype(np.float32)
 
 
-def read_dir(dir):
+def read_dir_and_seperate(dir, train_test_ratio):
     images_list = glob.glob(dir + '/*JPEG')
+    if len(images_list) == 0:
+        print(dir + " has not jpeg")
     i = images_list[0]
     img = image.load_img(i, target_size=(224, 224))
     img_array = image.img_to_array(img)
@@ -54,8 +56,19 @@ def read_dir(dir):
             images_array[k] = im
         else:
             print("shape doesn't match, pass this image: ", images_list[k])
-    return images_array
+    return separate_test_set(images_array, train_test_ratio)
 
+
+def separate_test_set(imgs, train_test_ratio):
+    test_ratio = 1. / (1. + train_test_ratio)
+    num = imgs.shape[0]
+    num_test = int(num * test_ratio)
+    num_train = num - num_test
+    idx = np.random.permutation(num)
+    imgs_perm = imgs[idx]
+    training = imgs_perm[:num_train]
+    test = imgs_perm[num_train:]
+    return training, test
 
 def extract_feature(x):
     print("extracting feature using resnet")
@@ -65,22 +78,27 @@ def extract_feature(x):
     y = y.reshape([num, feature_num])
     return y.astype(np.float32)
 
-def main():
-    #dirs = ['n01440764', 'n01443537', 'n01484850', 'n01491361', 'n01494475', 'n01496331', 'n01498041', 'n01514668',
-    #          'n01514859', 'n01518878']
-    dirs = ['n01440764', 'n01443537']
+
+def main(train_test_ratio=10):
+    dirs = ['n01440764', 'n01443537', 'n01484850', 'n01491361', 'n01494475', 'n01496331', 'n01498041', 'n01514668',
+              'n01514859', 'n01518878']
     dir0 = dirs[0]
 
     print("reading started")
-    train_images = read_dir(dir0)
+    train_images, test_images = read_dir_and_seperate(dir0, train_test_ratio)
     train_labels = np.array([0] * len(train_images))
+    test_labels = np.array([0] * len(test_images))
     for i in range(len(dirs))[1: ]:
-        new_images = read_dir(dirs[i])
-        train_images = np.concatenate((train_images, new_images))
-        train_labels = np.concatenate((train_labels, [i] * len(new_images)))
-    features = extract_feature(train_images)
+        new_train_images, new_test_images = read_dir_and_seperate(dirs[i], train_test_ratio)
+        train_images = np.concatenate((train_images, new_train_images))
+        train_labels = np.concatenate((train_labels, [i] * len(new_train_images)))
+        test_images = np.concatenate((test_images, new_test_images))
+        test_labels = np.concatenate((test_labels, [i] * len(new_test_images)))
     print("reading finished")
 
+    features = extract_feature(train_images)
+
+    # seperate data into training set and test set
     for ratio in [k / 10.0 for k in range(2)]:
         dir_name = 'imagenet_outlier_' + str(ratio)
         if not os.path.exists(dir_name):
@@ -118,20 +136,25 @@ def main():
             f.write(if_outlier.tobytes())
 
         # write features
-        num, x = features = features_resnet.shape
+        num, x =  features_resnet.shape
         header = np.array([0x0805, num, x], dtype='>i4')
         with open(features_name, 'wb') as f:
             f.write(header.tobytes())
             f.write(features_resnet.tobytes())
 
-    # header = np.array([0x0803, len(test_features), 32, 32, 3], dtype='>i4')
-    # with open('test-images-ubyte', 'wb') as f:
-    #     f.write(header.tobytes())
-    #     f.write(test_features.astype(np.uint8).tobytes())
-    # header = np.array([0x0801, len(test_labels)], dtype='>i4')
-    # with open('test-labels-ubyte', 'wb') as f:
-    #     f.write(header.tobytes())
-    #     f.write(test_labels.astype(np.uint8).tobytes())
+    # for test set
+    test_num, test_x, test_y, test_z = test_images.shape
+    idx = np.random.permutation(test_images)
+    test_images = test_images[idx]
+    test_labels = test_labels[idx]
+    header = np.array([0x0803, num, test_x, test_y, test_z], dtype='>i4')
+    with open('test-images-ubyte', 'wb') as f:
+        f.write(header.tobytes())
+        f.write(test_images.astype(np.uint8).tobytes())
+    header = np.array([0x0801, len(test_labels)], dtype='>i4')
+    with open('test-labels-ubyte', 'wb') as f:
+        f.write(header.tobytes())
+        f.write(test_labels.astype(np.uint8).tobytes())
 
 main()
 
