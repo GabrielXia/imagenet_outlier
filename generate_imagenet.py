@@ -99,7 +99,7 @@ def main(train_test_ratio=10):
     features = extract_feature(train_images)
 
     # seperate data into training set and test set
-    for ratio in [k / 10.0 for k in range(2)]:
+    for ratio in [k / 10.0 for k in range(4)]:
         dir_name = 'imagenet_outlier_' + str(ratio)
         if not os.path.exists(dir_name):
             os.mkdir(dir_name)
