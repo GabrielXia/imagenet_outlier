@@ -144,7 +144,7 @@ def main(train_test_ratio=10):
 
     # for test set
     test_num, test_x, test_y, test_z = test_images.shape
-    idx = np.random.permutation(test_images)
+    idx = np.random.permutation(test_num)
     test_images = test_images[idx]
     test_labels = test_labels[idx]
     header = np.array([0x0803, num, test_x, test_y, test_z], dtype='>i4')

@@ -140,7 +140,7 @@ class ImagenetOutlier:
         self.outlier_ratio = outlier_ratio
         self.train_images, self.train_labels, self.train_labels_true, self.train_if_outlier, self.features = \
             get_imagenet_outlier(outlier_ratio, one_hot)
-        # self.test_images, self.test_labels = get_test(one_hot)
+        self.test_images, self.test_labels = get_test(one_hot)
 
 if __name__ == '__main__':
     a = ImagenetOutlier(0.1)
