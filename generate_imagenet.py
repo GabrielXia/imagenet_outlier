@@ -147,7 +147,7 @@ def main(train_test_ratio=10):
     idx = np.random.permutation(test_num)
     test_images = test_images[idx]
     test_labels = test_labels[idx]
-    header = np.array([0x0803, num, test_x, test_y, test_z], dtype='>i4')
+    header = np.array([0x0803, test_num, test_x, test_y, test_z], dtype='>i4')
     with open('test-images-ubyte', 'wb') as f:
         f.write(header.tobytes())
         f.write(test_images.astype(np.uint8).tobytes())
