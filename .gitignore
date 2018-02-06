@@ -10,3 +10,4 @@ ResNet-L152.ckpt
 ResNet-L152.meta
 *.ipynb
 
+*.gz

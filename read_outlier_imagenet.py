@@ -68,7 +68,7 @@ def extract_features(f):
                        (magic, f.name))
     num_images = _read32(bytestream)
     x = _read32(bytestream)
-    buf = bytestream.read(num_images * x)
+    buf = bytestream.read(num_images * x * 4)
     data = numpy.frombuffer(buf, dtype=numpy.float32)
     data = data.reshape(num_images, x)
     return data
