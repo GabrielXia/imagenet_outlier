@@ -67,12 +67,10 @@ def extract_features(f):
       raise ValueError('Invalid magic number %d in imagenet feature file: %s' %
                        (magic, f.name))
     num_images = _read32(bytestream)
-    rows = _read32(bytestream)
-    cols = _read32(bytestream)
-    channel = _read32(bytestream)
-    buf = bytestream.read(rows * cols * num_images * channel)
+    x = _read32(bytestream)
+    buf = bytestream.read(num_images * x)
     data = numpy.frombuffer(buf, dtype=numpy.float32)
-    data = data.reshape(num_images, rows, cols, channel)
+    data = data.reshape(num_images, x)
     return data
 
 
