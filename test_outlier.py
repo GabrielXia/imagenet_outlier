@@ -5,8 +5,9 @@ from keras.applications.resnet50 import ResNet50
 model = ResNet50(include_top=False, weights='imagenet', input_tensor=None, input_shape=None, pooling=None)
 
 for ratio in [k / 10.0 for k in range(2)]:
-    o = ImagenetOutlier(k)
-    print("for ratio = ", k)
+    r = int(ratio * 10.) / 10.
+    o = ImagenetOutlier(r)
+    print("for ratio = ", r)
     print("train_images: ", o.train_images.shape)
     print("train_labels: ", o.train_labels.shape)
     print("train_labels_true: ", o.train_labels_true.shape)
